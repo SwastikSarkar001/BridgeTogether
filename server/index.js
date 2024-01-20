@@ -1,6 +1,5 @@
 const express = require('express');
 const app = express();
-const port = 3000;
 
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -55,6 +54,6 @@ app.post('/simulate-color-blind/:condition', upload.single('image'), async (req,
 });
 
 // Start the server
-app.listen(port, () => {
-  console.log(`Server is listening on port ${port}`);
+app.listen(process.env.PORT, () => {
+  console.log(`Server is listening on port ${process.env.PORT}`);
 });
