@@ -62,6 +62,7 @@ function App() {
                 value={selectedPreference}
                 onChange={handlePreferenceChange}
               >
+                <option value='Normal'>None</option>
                 <option value='Deafness'>Deafness</option>
                 <option value='Color-Blindness'>Color-Blindness</option>
                 <option value='Blindness'>Blindness</option>
@@ -334,9 +335,9 @@ function ChatMessage(props) {
           {text && <button onClick={() => textToSpeech(text)}>Speak</button>}
         </div>
       ) : (
-        !audioURL && <p>{text}</p>
+        !audioURL && !imageURL && <p>{text}</p>
       )}
-      {selectedPreference === 'Deafness' && audioURL ? <p>{transcription}</p> : <></>}
+      {selectedPreference === 'Deafness' && audioURL ? <p>{transcription}</p> : audioURL && <audio controls src={audioURL}></audio>}
       {imageURL && selectedPreference == "Color-Blindness" && <img src="https://res.cloudinary.com/dwazbst0b/image/upload/e_simulate_colorblind,g_center/vtkvh3kv6jqebnq5c3ti" alt="image" style={{ height: '200px', width: '300px', borderRadius: '0' }} />}
       {imageURL && !(selectedPreference === "Color-Blindness") && <img src={imageURL} alt="image" style={{ height: '200px', width: '300px', borderRadius: '0' }} />}
     </div>
