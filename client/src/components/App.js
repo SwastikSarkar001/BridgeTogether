@@ -1,14 +1,13 @@
 import React, { useRef, useState } from 'react';
 import '../styles/App.css';
-import Login from './Login';
-
+import Navbar from './Navbar';
 
 function App() {
-  const [user] = useAuthState(auth);
+  // const [user] = useAuthState(auth);
 
   return (
     <div className="App">
-      <Login />
+      <Navbar />
     </div>
   );
 }
