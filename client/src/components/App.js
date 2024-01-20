@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import '../styles/App.css';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
@@ -60,7 +60,7 @@ function App() {
       </header>
 
       <section>
-        {user ? <ChatRoom /> : <SignIn />}
+        {user ? <ChatRoom selectedPreference={selectedPreference} /> : <SignIn />}
       </section>
     </div>
   );
@@ -86,7 +86,7 @@ function SignOut() {
   )
 }
 
-function ChatRoom() {
+function ChatRoom(props) {
   const dummy = useRef();
   const messagesRef = firestore.collection('messages');
   const query = messagesRef.orderBy('createdAt');
@@ -211,7 +211,7 @@ function ChatRoom() {
     <>
       <main>
         {messages && messages.map((msg) => (
-          <ChatMessage key={msg.id} message={msg} />
+          <ChatMessage selectedPreference={props.selectedPreference} key={msg.id} message={msg} />
         ))}
         {renderAudio()}
         {renderImage()}
@@ -248,17 +248,45 @@ function ChatRoom() {
 
 function ChatMessage(props) {
   const { text, uid, photoURL, audioURL, imageURL } = props.message;
+  const { selectedPreference } = props;
+  const [responseImage, setResponseImage] = useState(null);
   const messageClass = uid === auth.currentUser.uid ? 'sent' : 'received';
+
+  useEffect(() => {
+    if (imageURL && selectedPreference == "Color-Blindness") {
+      handleImageUpload();
+    }
+  }, [selectedPreference]);
+
+  const handleImageUpload = async () => {
+    const formData = new FormData();
+    formData.append('image', imageURL);
+    try {
+      const response = await fetch('https://bridge-together-cvcx.vercel.app/simulate-color-blind/deuteranopia', {
+        method: 'POST',
+        body: formData,
+      });
+  
+      if (response.ok) {
+        const responseData = await response.json();
+        setResponseImage(responseData.simulatedImageUrl);
+      } else {
+        console.error('Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Error during image upload:', error);
+    }
+  };
 
   return (
     <div className={`message ${messageClass}`}>
       <img src={photoURL || 'https://api.adorable.io/avatars/23/abott@adorable.png'} alt="user" />
       {text && <p>{text}</p>}
       {audioURL && <audio controls src={audioURL}></audio>}
-      {imageURL && <img src={imageURL} alt="image" style={{ height: '200px', width: '300px', borderRadius: '0' }} />}
+      {imageURL && selectedPreference == "Color-Blindness" && <img src={responseImage} alt="image" style={{ height: '200px', width: '300px', borderRadius: '0' }} />}
+      {imageURL && !(selectedPreference === "Color-Blindness") && <img src={imageURL} alt="image" style={{ height: '200px', width: '300px', borderRadius: '0' }} />}
     </div>
   );
 }
 
 export default App;
-
