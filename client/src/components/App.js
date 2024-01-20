@@ -24,12 +24,39 @@ const storage = firebase.storage();
 
 function App() {
   const [user] = useAuthState(auth);
+  const [click, setClick] = useState(false);
+  const [selectedPreference, setSelectedPreference] = useState('');
+
+  const handlePreferenceChange = (event) => {
+    const newPreference = event.target.value;
+    setSelectedPreference(newPreference);
+
+    // Store the selected preference in local storage
+    localStorage.setItem('userPreference', newPreference);
+  };
 
   return (
     <div className="App">
       <header>
         <h1>Chat</h1>
         <SignOut />
+        <span className='text-white relative cursor-pointer' onClick={() => setClick(!click)}>
+          Preferences
+          {click ? (
+            <div onClick={(e) => e.stopPropagation()} className='bg-gray-700 flex flex-col gap-4 p-4 w-60 absolute top-6'>
+              <select
+                className='border-2 border-gray-300 text-black rounded-md p-2'
+                value={selectedPreference}
+                onChange={handlePreferenceChange}
+              >
+                <option value='Deafness'>Deafness</option>
+                <option value='Color-Blindness'>Color-Blindness</option>
+                <option value='Color-Blindness'>Blindness</option>
+              </select>
+              <button onClick={() => setClick(false)} className='px-6 py-2 bg-red-600 border-rounded'>Close</button>
+            </div>
+          ) : null}
+        </span>
       </header>
 
       <section>
