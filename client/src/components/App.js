@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import '../styles/App.css';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
@@ -8,6 +8,11 @@ import 'firebase/compat/storage'; // Add storage import
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { ReactMic } from 'react-mic'; 
+import { AssemblyAI } from 'assemblyai'
+
+const client = new AssemblyAI({
+  apiKey: "fe7b2e07912d4a3188025ac0fd954d3b"
+})
 
 firebase.initializeApp({
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
