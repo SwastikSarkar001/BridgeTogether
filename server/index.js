@@ -5,7 +5,10 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
+const { SpeechClient } = require('@google-cloud/speech');
 require('dotenv').config();
+
+process.env.GOOGLE_APPLICATION_CREDENTIALS="./groovy-height-404319-b1648a1b13c5.json";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -50,6 +53,37 @@ app.post('/simulate-color-blind/:condition', upload.single('image'), async (req,
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/speech-to-text', upload.single('audio'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Audio file is required.' });
+    }
+
+    const audioBuffer = req.file.buffer;
+    const speechClient = new SpeechClient();
+
+    const [response] = await speechClient.recognize({
+      audio: {
+        content: audioBuffer,
+      },
+      config: {
+        encoding: 'LINEAR16',
+        sampleRateHertz: 16000,
+        languageCode: 'en-US',
+      },
+    });
+
+    const transcription = response.results
+      .map(result => result.alternatives[0].transcript)
+      .join('\n');
+
+    res.json({ text: transcription });
+  } catch (error) {
+    console.error('Error processing audio:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
