@@ -334,9 +334,9 @@ function ChatMessage(props) {
           {text && <button onClick={() => textToSpeech(text)}>Speak</button>}
         </div>
       ) : (
-        !audioURL && <p>{text}</p>
+        !audioURL && !imageURL && <p>{text}</p>
       )}
-      {selectedPreference === 'Deafness' && audioURL ? <p>{transcription}</p> : <></>}
+      {selectedPreference === 'Deafness' && audioURL ? <p>{transcription}</p> : audioURL && <audio controls src={audioURL}></audio>}
       {imageURL && selectedPreference == "Color-Blindness" && <img src={responseImage} alt="image" style={{ height: '200px', width: '300px', borderRadius: '0' }} />}
       {imageURL && !(selectedPreference === "Color-Blindness") && <img src={imageURL} alt="image" style={{ height: '200px', width: '300px', borderRadius: '0' }} />}
     </div>
