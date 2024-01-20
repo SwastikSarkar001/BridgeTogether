@@ -245,6 +245,7 @@ function ChatRoom(props) {
           onStop={onRecordingComplete}
           strokeColor="#000000"
           backgroundColor="#FF4081"
+          className='w-28'
         />
 
         <button type="button" onClick={() => setRecord(!record)}>
