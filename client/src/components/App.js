@@ -14,6 +14,7 @@ const client = new AssemblyAI({
   apiKey: "fe7b2e07912d4a3188025ac0fd954d3b"
 })
 
+
 firebase.initializeApp({
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
@@ -29,7 +30,25 @@ const storage = firebase.storage();
 
 function App() {
   const [user] = useAuthState(auth);
+  const [click, setClick] = useState(false);
+  const [selectedPreference, setSelectedPreference] = useState('');
   let home = user? <ChatRoom />: <Home />;
+
+  const handlePreferenceChange = (event) => {
+    const newPreference = event.target.value;
+    setSelectedPreference(newPreference);
+
+    // Store the selected preference in local storage
+    localStorage.removeItem('userPreference');
+    localStorage.setItem('userPreference', newPreference);
+  };
+
+  useEffect(()=> {
+    const preference = localStorage.getItem("userPreference");
+    setSelectedPreference(preference);
+    console.log(preference);
+  },[]);
+
   return (
     <div className="App">
       <Navbar />
