@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import '../styles/App.css';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
@@ -8,6 +8,12 @@ import 'firebase/compat/storage'; // Add storage import
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { ReactMic } from 'react-mic'; 
+import { AssemblyAI } from 'assemblyai'
+
+const client = new AssemblyAI({
+  apiKey: "fe7b2e07912d4a3188025ac0fd954d3b"
+})
+
 
 firebase.initializeApp({
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -32,8 +38,15 @@ function App() {
     setSelectedPreference(newPreference);
 
     // Store the selected preference in local storage
+    localStorage.removeItem('userPreference');
     localStorage.setItem('userPreference', newPreference);
   };
+
+  useEffect(()=> {
+    const preference = localStorage.getItem("userPreference");
+    setSelectedPreference(preference);
+    console.log(preference);
+  },[]);
 
   return (
     <div className="App">
@@ -51,7 +64,7 @@ function App() {
               >
                 <option value='Deafness'>Deafness</option>
                 <option value='Color-Blindness'>Color-Blindness</option>
-                <option value='Color-Blindness'>Blindness</option>
+                <option value='Blindness'>Blindness</option>
               </select>
               <button onClick={() => setClick(false)} className='px-6 py-2 bg-red-600 border-rounded'>Close</button>
             </div>
@@ -60,7 +73,7 @@ function App() {
       </header>
 
       <section>
-        {user ? <ChatRoom /> : <SignIn />}
+        {user ? <ChatRoom selectedPreference={selectedPreference} /> : <SignIn />}
       </section>
     </div>
   );
@@ -86,7 +99,8 @@ function SignOut() {
   )
 }
 
-function ChatRoom() {
+function ChatRoom(props) {
+  const selectedPreference = props.selectedPreference;
   const dummy = useRef();
   const messagesRef = firestore.collection('messages');
   const query = messagesRef.orderBy('createdAt');
@@ -211,7 +225,7 @@ function ChatRoom() {
     <>
       <main>
         {messages && messages.map((msg) => (
-          <ChatMessage key={msg.id} message={msg} />
+          <ChatMessage key={msg.id} message={msg} selectedPreference={selectedPreference}/>
         ))}
         {renderAudio()}
         {renderImage()}
@@ -246,15 +260,56 @@ function ChatRoom() {
   );
 }
 
+
 function ChatMessage(props) {
   const { text, uid, photoURL, audioURL } = props.message;
+  const selectedPreference = props.selectedPreference;
   const messageClass = uid === auth.currentUser.uid ? 'sent' : 'received';
+  const [transcription, setTranscription] = useState(null);
+
+  const textToSpeech = (text) => {
+    const synth = window.speechSynthesis;
+    const utterance = new SpeechSynthesisUtterance(text);
+    synth.speak(utterance);
+  };
+
+  const params = {
+    audio: audioURL,
+  };
+
+  const speechToText = async () => {
+    try {
+      // Assuming you have a properly initialized 'client' object
+      const transcript = await client.transcripts.transcribe(params);
+      setTranscription(transcript.text);
+    } catch (error) {
+      console.log('Error converting audio to text:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    console.log("it is what it is", selectedPreference);
+    // Call speechToText when the component mounts or when selectedPreference changes
+    speechToText();
+
+    // Clean up the transcription when the component unmounts
+    return () => {
+      setTranscription(null);
+    };
+  }, [selectedPreference, audioURL]);
 
   return (
     <div className={`message ${messageClass}`}>
       <img src={photoURL || 'https://api.adorable.io/avatars/23/abott@adorable.png'} alt="user" />
-      {text && <p>{text}</p>}
-      {audioURL && <audio controls src={audioURL}></audio>}
+      {selectedPreference === 'Blindness' ? (
+        <div>
+          {text && <button onClick={() => textToSpeech(text)}>Speak</button>}
+        </div>
+      ) : (
+        !audioURL && <p>{text}</p>
+      )}
+      {selectedPreference === 'Deafness' && audioURL ? <p>{transcription}</p> : <></>}
     </div>
   );
 }
