@@ -95,6 +95,7 @@ function ChatRoom() {
   const [formValue, setFormValue] = useState('');
   const [record, setRecord] = useState(false); // State to control recording
   const [blob, setBlob] = useState(null); // State to store recorded audio
+  const [image, setImage] = useState(null);
 
   const onRecordingComplete = (blobObject) => {
     setBlob(blobObject.blob);
@@ -109,6 +110,20 @@ function ChatRoom() {
             <source src={audioUrl} type="audio/wav" />
             Your browser does not support the audio element.
           </audio>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const renderImage = () => {
+    if (image) {
+      const imageUrl = URL.createObjectURL(image);
+      console.log('Image URL:', imageUrl);
+  
+      return (
+        <div>
+          <img src={imageUrl} alt="image" style={{ height: '200px', width: '300px', borderRadius: '0' }} />
         </div>
       );
     }
@@ -139,6 +154,34 @@ function ChatRoom() {
     dummy.current.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    setImage(file);
+  };
+
+  const handleImageUpload = async () => {
+    const { uid, photoURL } = auth.currentUser;
+  
+    // Upload image to Firebase Storage
+    const storageRef = storage.ref();
+    const imageRef = storageRef.child(`${uid}/${new Date().toISOString()}.jpg`);
+    await imageRef.put(image);
+  
+    // Get the URL of the uploaded image
+    const imageURL = await imageRef.getDownloadURL();
+  
+    // Add image message to Firestore
+    await messagesRef.add({
+      imageURL,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      uid,
+      photoURL,
+    });
+  
+    setImage(null); 
+    dummy.current.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const sendMessage = async (e) => {
     e.preventDefault();
 
@@ -159,6 +202,9 @@ function ChatRoom() {
     if (blob) {
       await sendVoiceMessage();
     }
+    if (image){
+      await handleImageUpload();
+    }
   };
 
   return (
@@ -168,6 +214,7 @@ function ChatRoom() {
           <ChatMessage key={msg.id} message={msg} />
         ))}
         {renderAudio()}
+        {renderImage()}
         <span ref={dummy}></span>
       </main>
 
@@ -189,7 +236,9 @@ function ChatRoom() {
           {record ? 'Stop Recording' : 'Start Recording'}
         </button>
 
-        <button type="submit" disabled={!formValue && !blob}>
+        <input type='file' accept="image/*" onChange={handleImageChange}/>
+
+        <button type="submit" disabled={!formValue && !blob && !image}>
           Send
         </button>
       </form>
