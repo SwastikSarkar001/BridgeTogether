@@ -322,18 +322,85 @@ function ChatRoom() {
 }
 
 function ChatMessage(props) {
+  const selectedPreference = props.selectedPreference;
   const { text, uid, photoURL, audioURL, imageURL } = props.message;
+  const [responseImage, setResponseImage] = useState(null);
   const messageClass = uid === auth.currentUser.uid ? 'sent' : 'received';
+  const [transcription, setTranscription] = useState(null);
+
+  const textToSpeech = (text) => {
+    const synth = window.speechSynthesis;
+    const utterance = new SpeechSynthesisUtterance(text);
+    synth.speak(utterance);
+  };
+
+  const params = {
+    audio: audioURL,
+  };
+
+  const speechToText = async () => {
+    try {
+      // Assuming you have a properly initialized 'client' object
+      const transcript = await client.transcripts.transcribe(params);
+      setTranscription(transcript.text);
+    } catch (error) {
+      console.log('Error converting audio to text:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    console.log("it is what it is", selectedPreference);
+    // Call speechToText when the component mounts or when selectedPreference changes
+    speechToText();
+
+    // Clean up the transcription when the component unmounts
+    return () => {
+      setTranscription(null);
+    };
+  }, [selectedPreference, audioURL]);
+
+  useEffect(() => {
+    if (imageURL && selectedPreference == "Color-Blindness") {
+      handleImageUpload();
+    }
+  }, [selectedPreference]);
+
+  const handleImageUpload = async () => {
+    const formData = new FormData();
+    formData.append('image', imageURL);
+    try {
+      const response = await fetch('https://bridge-together-cvcx.vercel.app/simulate-color-blind/deuteranopia', {
+        method: 'POST',
+        body: formData,
+      });
+  
+      if (response.ok) {
+        const responseData = await response.json();
+        setResponseImage(responseData.simulatedImageUrl);
+      } else {
+        console.error('Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Error during image upload:', error);
+    }
+  };
 
   return (
     <div className={`message ${messageClass} flex gap-x-3 items-center`}>
       <img className="rounded-full w-8 h-8" src={photoURL || 'https://api.adorable.io/avatars/23/abott@adorable.png'} alt="user" />
-      {text && <p className="bg-slate-50 px-4 py-2 rounded-3xl">{text}</p>}
-      {audioURL && <audio controls src={audioURL}></audio>}
-      {imageURL && <img className="rounded-xl" src={imageURL} alt="image" style={{width: '300px', aspectRatio: '[3/2]'}} />}
+      {selectedPreference === 'Blindness' ? (
+        <div>
+          {text && <button onclick={() => textToSpeech(text)} className="bg-slate-50 px-4 py-2 rounded-3xl">{text}</button>}
+        </div>
+      ) : (
+        !audioURL && <p>{text}</p>
+      )}
+      {selectedPreference === 'Deafness' && audioURL ? <p>{transcription}</p> : <></>}
+      {imageURL && selectedPreference == "Color-Blindness" && <img src={responseImage} className="rounded-xl" alt="image" style={{width: '300px', aspectRatio: '[3/2]'}} />}
+      {imageURL && !(selectedPreference === "Color-Blindness") && <img src={imageURL} className="rounded-xl" alt="image" style={{width: '300px', aspectRatio: '[3/2]'}} />}
     </div>
   );
 }
 
 export default App;
-
