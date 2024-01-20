@@ -338,7 +338,7 @@ function ChatMessage(props) {
         !audioURL && !imageURL && <p>{text}</p>
       )}
       {selectedPreference === 'Deafness' && audioURL ? <p>{transcription}</p> : audioURL && <audio controls src={audioURL}></audio>}
-      {imageURL && selectedPreference == "Color-Blindness" && <img src={responseImage} alt="image" style={{ height: '200px', width: '300px', borderRadius: '0' }} />}
+      {imageURL && selectedPreference == "Color-Blindness" && <img src="https://res.cloudinary.com/dwazbst0b/image/upload/e_simulate_colorblind,g_center/vtkvh3kv6jqebnq5c3ti" alt="image" style={{ height: '200px', width: '300px', borderRadius: '0' }} />}
       {imageURL && !(selectedPreference === "Color-Blindness") && <img src={imageURL} alt="image" style={{ height: '200px', width: '300px', borderRadius: '0' }} />}
     </div>
   );
