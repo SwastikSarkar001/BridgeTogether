@@ -62,6 +62,7 @@ function App() {
                 value={selectedPreference}
                 onChange={handlePreferenceChange}
               >
+                <option value='Normal'>None</option>
                 <option value='Deafness'>Deafness</option>
                 <option value='Color-Blindness'>Color-Blindness</option>
                 <option value='Blindness'>Blindness</option>
