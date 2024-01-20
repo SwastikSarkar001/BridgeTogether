@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import '../styles/App.css';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
@@ -225,7 +225,7 @@ function ChatRoom(props) {
     <>
       <main>
         {messages && messages.map((msg) => (
-          <ChatMessage key={msg.id} message={msg} selectedPreference={selectedPreference}/>
+          <ChatMessage selectedPreference={props.selectedPreference} key={msg.id} message={msg} />
         ))}
         {renderAudio()}
         {renderImage()}
@@ -262,8 +262,9 @@ function ChatRoom(props) {
 
 
 function ChatMessage(props) {
-  const { text, uid, photoURL, audioURL } = props.message;
   const selectedPreference = props.selectedPreference;
+  const { text, uid, photoURL, audioURL, imageURL } = props.message;
+  const [responseImage, setResponseImage] = useState(null);
   const messageClass = uid === auth.currentUser.uid ? 'sent' : 'received';
   const [transcription, setTranscription] = useState(null);
 
@@ -299,6 +300,32 @@ function ChatMessage(props) {
     };
   }, [selectedPreference, audioURL]);
 
+  useEffect(() => {
+    if (imageURL && selectedPreference == "Color-Blindness") {
+      handleImageUpload();
+    }
+  }, [selectedPreference]);
+
+  const handleImageUpload = async () => {
+    const formData = new FormData();
+    formData.append('image', imageURL);
+    try {
+      const response = await fetch('https://bridge-together-cvcx.vercel.app/simulate-color-blind/deuteranopia', {
+        method: 'POST',
+        body: formData,
+      });
+  
+      if (response.ok) {
+        const responseData = await response.json();
+        setResponseImage(responseData.simulatedImageUrl);
+      } else {
+        console.error('Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Error during image upload:', error);
+    }
+  };
+
   return (
     <div className={`message ${messageClass}`}>
       <img src={photoURL || 'https://api.adorable.io/avatars/23/abott@adorable.png'} alt="user" />
@@ -310,9 +337,10 @@ function ChatMessage(props) {
         !audioURL && <p>{text}</p>
       )}
       {selectedPreference === 'Deafness' && audioURL ? <p>{transcription}</p> : <></>}
+      {imageURL && selectedPreference == "Color-Blindness" && <img src={responseImage} alt="image" style={{ height: '200px', width: '300px', borderRadius: '0' }} />}
+      {imageURL && !(selectedPreference === "Color-Blindness") && <img src={imageURL} alt="image" style={{ height: '200px', width: '300px', borderRadius: '0' }} />}
     </div>
   );
 }
 
 export default App;
-
