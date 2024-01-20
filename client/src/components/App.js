@@ -24,10 +24,11 @@ const storage = firebase.storage();
 
 function App() {
   const [user] = useAuthState(auth);
-
+  let home = user? <ChatRoom />: <Home />;
   return (
     <div className="App">
       <Navbar />
+      {home}
     </div>
   );
 }
@@ -149,15 +150,24 @@ function SignOut() {
   )
 }
 
+function Home() {
+  return(
+    <main>
+      Hello World!
+    </main>
+  );
+}
+
 function ChatRoom() {
   const dummy = useRef();
   const messagesRef = firestore.collection('messages');
-  const query = messagesRef.orderBy('createdAt').limit(25);
+  const query = messagesRef.orderBy('createdAt');
   const [messages] = useCollectionData(query, { idField: 'id' });
 
   const [formValue, setFormValue] = useState('');
   const [record, setRecord] = useState(false); // State to control recording
   const [blob, setBlob] = useState(null); // State to store recorded audio
+  const [image, setImage] = useState(null);
 
   const onRecordingComplete = (blobObject) => {
     setBlob(blobObject.blob);
@@ -172,6 +182,20 @@ function ChatRoom() {
             <source src={audioUrl} type="audio/wav" />
             Your browser does not support the audio element.
           </audio>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const renderImage = () => {
+    if (image) {
+      const imageUrl = URL.createObjectURL(image);
+      console.log('Image URL:', imageUrl);
+  
+      return (
+        <div>
+          <img src={imageUrl} alt="image" style={{ height: '200px', width: '300px', borderRadius: '0' }} />
         </div>
       );
     }
@@ -202,6 +226,34 @@ function ChatRoom() {
     dummy.current.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    setImage(file);
+  };
+
+  const handleImageUpload = async () => {
+    const { uid, photoURL } = auth.currentUser;
+  
+    // Upload image to Firebase Storage
+    const storageRef = storage.ref();
+    const imageRef = storageRef.child(`${uid}/${new Date().toISOString()}.jpg`);
+    await imageRef.put(image);
+  
+    // Get the URL of the uploaded image
+    const imageURL = await imageRef.getDownloadURL();
+  
+    // Add image message to Firestore
+    await messagesRef.add({
+      imageURL,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      uid,
+      photoURL,
+    });
+  
+    setImage(null); 
+    dummy.current.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const sendMessage = async (e) => {
     e.preventDefault();
 
@@ -222,37 +274,46 @@ function ChatRoom() {
     if (blob) {
       await sendVoiceMessage();
     }
+    if (image){
+      await handleImageUpload();
+    }
   };
 
   return (
     <>
-      <main>
+      <main className="flex flex-col gap-y-5 bg-gray-900">
         {messages && messages.map((msg) => (
           <ChatMessage key={msg.id} message={msg} />
         ))}
         {renderAudio()}
+        {renderImage()}
         <span ref={dummy}></span>
       </main>
 
       <form onSubmit={sendMessage}>
+        
         <input
-          value={formValue}
-          onChange={(e) => setFormValue(e.target.value)}
+          type="text" id="first_name"
+          className="bg-gray-50 border border-gray-300 text-slate-50 outline-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-slate-500 dark:focus:border-slate-500"
           placeholder="Type a message or record a voice message"
+          onChange={(e) => setFormValue(e.target.value)}
+          value={formValue}
         />
 
         <ReactMic
           record={record}
           onStop={onRecordingComplete}
           strokeColor="#000000"
-          backgroundColor="#FF4081"
+          backgroundColor="#e37034"
         />
 
         <button type="button" onClick={() => setRecord(!record)}>
           {record ? 'Stop Recording' : 'Start Recording'}
         </button>
 
-        <button type="submit" disabled={!formValue && !blob}>
+        <input type='file' accept="image/*" onChange={handleImageChange}/>
+
+        <button type="submit" disabled={!formValue && !blob && !image}>
           Send
         </button>
       </form>
@@ -261,14 +322,15 @@ function ChatRoom() {
 }
 
 function ChatMessage(props) {
-  const { text, uid, photoURL, audioURL } = props.message;
+  const { text, uid, photoURL, audioURL, imageURL } = props.message;
   const messageClass = uid === auth.currentUser.uid ? 'sent' : 'received';
 
   return (
-    <div className={`message ${messageClass}`}>
-      <img src={photoURL || 'https://api.adorable.io/avatars/23/abott@adorable.png'} alt="user" />
-      {text && <p>{text}</p>}
+    <div className={`message ${messageClass} flex gap-x-3 items-center`}>
+      <img className="rounded-full w-8 h-8" src={photoURL || 'https://api.adorable.io/avatars/23/abott@adorable.png'} alt="user" />
+      {text && <p className="bg-slate-50 px-4 py-2 rounded-3xl">{text}</p>}
       {audioURL && <audio controls src={audioURL}></audio>}
+      {imageURL && <img className="rounded-xl" src={imageURL} alt="image" style={{width: '300px', aspectRatio: '[3/2]'}} />}
     </div>
   );
 }

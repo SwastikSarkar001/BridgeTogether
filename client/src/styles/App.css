@@ -1,14 +1,8 @@
-* {
-    margin: 0;
-    padding: 0;
+.sent {
+    margin-left: auto;
+    flex-direction: row-reverse;
 }
-.google-icon {
-    aspect-ratio: 1/1;
-    width: 16px;
-}
-
-.signout-icon {
-    aspect-ratio: 1/1;
-    width: 16px;
-    color: #fff;
+.received {
+    margin-right: auto;
+    flex-direction: row;
 }
