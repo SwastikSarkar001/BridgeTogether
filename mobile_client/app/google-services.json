@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "70643990984",
+    "project_id": "my-chat-app-4f50b",
+    "storage_bucket": "my-chat-app-4f50b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:70643990984:android:a0cb1d8577213abb9840fd",
+        "android_client_info": {
+          "package_name": "com.bera.inclusive_chat_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "70643990984-0s8r0v38lq09lsq1k16a7rcagisfk56g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bera.inclusive_chat_app",
+            "certificate_hash": "e2b78ad07f49035a619b7eab97565dfc2b0eeb56"
+          }
+        },
+        {
+          "client_id": "70643990984-g0p3a9rjr2qgudijmaof39ubn6otf48g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIPstnqpTgBIFvDDztGxw-5XyZJNCBXCg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "70643990984-g0p3a9rjr2qgudijmaof39ubn6otf48g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
