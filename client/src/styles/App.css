@@ -6,3 +6,10 @@
     margin-right: auto;
     flex-direction: row;
 }
+.App {
+    min-height: 100vh;
+}
+.visualizer {
+    border-radius: 100px;
+}
+
