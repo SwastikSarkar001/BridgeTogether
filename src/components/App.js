@@ -54,7 +54,6 @@ function Navbar(props) {
   const setSelectedPreference = props.setSelectedPreference;
   const selectedPreference = props.selectedPreference;
 
-
   const handlePreferenceChange = (event) => {
     const newPreference = event.target.value;
     setSelectedPreference(newPreference);
@@ -92,7 +91,11 @@ function Navbar(props) {
               >
                 <option selected value='Normal'>None</option>
                 <option value='Deafness'>Deafness</option>
-                <option value='Color-Blindness'>Color-Blindness</option>
+                <option value='cone-monochromacy'>cone-monochromacy</option>
+                <option value='rod-monochromacy'>rod-monochromacy</option>
+                <option value='protanopia'>protanopia</option>
+                <option value='deuteranopia'>deuteranopia</option>
+                <option value='tritanopia'>tritanopia</option>
                 <option value='Blindness'>Blindness</option>
               </select>
             </div>
@@ -483,32 +486,6 @@ function ChatMessage(props) {
     };
   }, [selectedPreference, audioURL]);
 
-  useEffect(() => {
-    if (imageURL && selectedPreference == "Color-Blindness") {
-      handleImageUpload();
-    }
-  }, [selectedPreference]);
-
-  const handleImageUpload = async () => {
-    const formData = new FormData();
-    formData.append('image', imageURL);
-    try {
-      const response = await fetch('https://bridge-together-cvcx.vercel.app/simulate-color-blind/deuteranopia', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        const responseData = await response.json();
-        setResponseImage(responseData.simulatedImageUrl);
-      } else {
-        console.error('Failed to upload image');
-      }
-    } catch (error) {
-      console.error('Error during image upload:', error);
-    }
-  };
-
   return (
     <div className={`message ${messageClass} flex gap-x-3 items-center py-3`}>
       <img className="rounded-full w-8 h-8" src={photoURL || 'https://api.adorable.io/avatars/23/abott@adorable.png'} alt="user" />
@@ -520,7 +497,7 @@ function ChatMessage(props) {
         !audioURL && <p className={(messageClass == 'sent'? "bg-blue-600": "bg-slate-600")+(text && " px-4 py-2")+" rounded-3xl"}>{text}</p>
       )}
       {selectedPreference === 'Deafness' && audioURL ? <p className="bg-slate-50 px-4 py-2 rounded-3xl">{transcription}</p> : audioURL && <audio controls src={audioURL}></audio>}
-      {imageURL && selectedPreference == "Color-Blindness" && <img src={responseImage} className="rounded-xl" alt="image" style={{ width: '300px', aspectRatio: '[3/2]' }} />}
+      {imageURL && selectedPreference == "Color-Blindness" && <img src={imageURL} className={`rounded-xl ${selectedPreference}`} alt="image" style={{ width: '300px', aspectRatio: '[3/2]' }} />}
       {imageURL && !(selectedPreference === "Color-Blindness") && <img src={imageURL} className="rounded-xl" alt="image" style={{ width: '300px', aspectRatio: '[3/2]' }} />}
     </div>
   );
