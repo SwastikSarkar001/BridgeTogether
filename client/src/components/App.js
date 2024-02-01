@@ -29,16 +29,17 @@ const storage = firebase.storage();
 
 function App() {
   const [user] = useAuthState(auth);
+  const [selectedPreference, setSelectedPreference] = useState('');
 
   return (
     <div className="App bg-gray-900 relative">
       <Router>
-        <Navbar />
+        <Navbar selectedPreference = {selectedPreference} setSelectedPreference = {setSelectedPreference}/>
         <main className="main-content relative text-slate-50 text-lg">
           <Routes>
             <Route exact path="/" element={<Home />} />
             <Route exact path="/about" element={<About />} />
-            {user && <Route exact path="/chat" element={<ChatRoom />} />}
+            {user && <Route exact path="/chat" element={<ChatRoom selectedPreference={selectedPreference} />} />}
             <Route exact path="/contact-us" element={<ContactUs />} />
             <Route path="*" element={<Navigate to='/' />} />
           </Routes>
@@ -48,10 +49,11 @@ function App() {
   );
 }
 
-function Navbar() {
+function Navbar(props) {
   const [user] = useAuthState(auth);
+  const setSelectedPreference = props.setSelectedPreference;
+  const selectedPreference = props.selectedPreference;
 
-  const [selectedPreference, setSelectedPreference] = useState('');
 
   const handlePreferenceChange = (event) => {
     const newPreference = event.target.value;
@@ -65,7 +67,7 @@ function Navbar() {
   useEffect(() => {
     const preference = localStorage.getItem("userPreference");
     setSelectedPreference(preference);
-    console.log(preference);
+    console.log("prefernece is ",preference);
   }, []);
 
   const location = useLocation();
@@ -396,10 +398,10 @@ function ChatRoom(props) {
 
   return (
     <>
-      <main id="chat-box-screen" className="chat-box-screen overflow-y-scroll flex flex-col justify-end py-3 px-8 gap-y-5 bg-gray-900">
-        <div  className='flex min-h-full flex-col justify-end'>
+      <main id="chat-box-screen" className="overflow-y-scroll chat-box-screen flex flex-col py-3 px-8 gap-y-5 bg-gray-900">
+        <div  className='flex min-h-full flex-col'>
           {messages && messages.map((msg) => (
-            <ChatMessage key={msg.id} message={msg} />
+            <ChatMessage key={msg.id} message={msg} selectedPreference={selectedPreference} />
           ))}
           {renderAudio()}
           {renderImage()}
@@ -449,6 +451,7 @@ function ChatMessage(props) {
   const [transcription, setTranscription] = useState(null);
 
   const textToSpeech = (text) => {
+    console.log("text to speech called");
     const synth = window.speechSynthesis;
     const utterance = new SpeechSynthesisUtterance(text);
     synth.speak(utterance);
@@ -470,7 +473,7 @@ function ChatMessage(props) {
 
 
   useEffect(() => {
-    console.log("it is what it is", selectedPreference);
+    // console.log("it is what it is", selectedPreference);
     // Call speechToText when the component mounts or when selectedPreference changes
     speechToText();
 
@@ -511,7 +514,7 @@ function ChatMessage(props) {
       <img className="rounded-full w-8 h-8" src={photoURL || 'https://api.adorable.io/avatars/23/abott@adorable.png'} alt="user" />
       {selectedPreference === 'Blindness' ? (
         <div>
-          {text && <button onclick={() => textToSpeech(text)}>{text}</button>}
+          {text && <button onClick={() => textToSpeech(text)}>Speak</button>}
         </div>
       ) : (
         !audioURL && <p className={(messageClass == 'sent'? "bg-blue-600": "bg-slate-600")+(text && " px-4 py-2")+" rounded-3xl"}>{text}</p>
