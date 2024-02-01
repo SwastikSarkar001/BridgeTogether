@@ -516,7 +516,7 @@ function ChatMessage(props) {
       ) : (
         !audioURL && <p className={(messageClass == 'sent'? "bg-blue-600": "bg-slate-600")+(text && " px-4 py-2")+" rounded-3xl"}>{text}</p>
       )}
-      {selectedPreference === 'Deafness' && audioURL ? <p className="bg-slate-50 px-4 py-2 rounded-3xl">{transcription}</p> : <></>}
+      {selectedPreference === 'Deafness' && audioURL ? <p className="bg-slate-50 px-4 py-2 rounded-3xl">{transcription}</p> : audioURL && <audio controls src={audioURL}></audio>}
       {imageURL && selectedPreference == "Color-Blindness" && <img src={responseImage} className="rounded-xl" alt="image" style={{ width: '300px', aspectRatio: '[3/2]' }} />}
       {imageURL && !(selectedPreference === "Color-Blindness") && <img src={imageURL} className="rounded-xl" alt="image" style={{ width: '300px', aspectRatio: '[3/2]' }} />}
     </div>
