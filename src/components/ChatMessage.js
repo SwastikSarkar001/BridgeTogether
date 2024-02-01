@@ -3,7 +3,7 @@ import { auth } from '../firebase';
 import { AssemblyAI } from 'assemblyai'
 
 const client = new AssemblyAI({
-  apiKey: "fe7b2e07912d4a3188025ac0fd954d3b"
+  apiKey: process.env.REACT_APP_ASSEMBLY_AI_API_KEY
 })
 
 function ChatMessage(props) {
