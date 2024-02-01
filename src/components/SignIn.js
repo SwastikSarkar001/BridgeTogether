@@ -1,4 +1,4 @@
-import { firebase, auth } from "./firebase";
+import { firebase, auth } from "../firebase";
 
 function SignIn() {
   const signInWithGoogle = () => {

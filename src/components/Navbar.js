@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from './firebase';
+import { auth } from '../firebase';
 import SignOut from './SignOut';
 import SignIn from './SignIn';
 import { Link } from 'react-router-dom';

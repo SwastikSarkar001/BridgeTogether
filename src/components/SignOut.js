@@ -1,4 +1,4 @@
-import { auth } from "./firebase";
+import { auth } from "../firebase";
 
 function SignOut() {
   return auth.currentUser && (

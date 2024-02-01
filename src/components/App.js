@@ -6,7 +6,7 @@ import Navbar from './Navbar';
 import Home from './Home';
 import About from './About';
 import ContactUs from './ContactUs';
-import { auth } from './firebase';
+import { auth } from '../firebase';
 import ChatRoom from './ChatRoom';
 
 function App() {

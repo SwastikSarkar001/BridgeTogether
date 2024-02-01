@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { auth } from './firebase';
+import { auth } from '../firebase';
 import { AssemblyAI } from 'assemblyai'
 
 const client = new AssemblyAI({
