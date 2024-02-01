@@ -23,4 +23,9 @@
 .chat-box-screen {
     height: calc(100vh - 136px);
     max-height: calc(100vh - 136px);
+    overflow-y: scroll !important;
+}
+
+.chat-box-screen>div{
+    overflow-y: scroll !important;
 }
