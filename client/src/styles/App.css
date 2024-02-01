@@ -11,5 +11,16 @@
 }
 .visualizer {
     border-radius: 100px;
+    height: 40px;
+    width: 90%;
 }
-
+.main-content {
+    min-height: calc(100vh - 76px);
+}
+.form {
+    height: 60px;
+}
+.chat-box-screen {
+    height: calc(100vh - 136px);
+    max-height: calc(100vh - 136px);
+}

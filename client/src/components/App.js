@@ -31,10 +31,10 @@ function App() {
   const [user] = useAuthState(auth);
 
   return (
-    <div className="App bg-gray-900">
+    <div className="App bg-gray-900 relative">
       <Router>
         <Navbar />
-        <main className="text-slate-50 text-lg" style={{ whiteSpace: "pre-wrap" }}>
+        <main className="main-content relative text-slate-50 text-lg">
           <Routes>
             <Route exact path="/" element={<Home />} />
             <Route exact path="/about" element={<About />} />
@@ -72,7 +72,7 @@ function Navbar() {
   const activeClass = "block py-2 px-3 md:p-0 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:dark:text-blue-500";
   const inactiveClass = "block py-2 px-3 md:p-0 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700";
   return (
-    <nav className="bg-white border-gray-200 dark:bg-gray-900">
+    <nav className="sticky top-0 bg-white border-gray-200 dark:bg-gray-900">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
         <a href="https://flowbite.com/" className="flex items-center space-x-3 rtl:space-x-reverse">
           <img src="https://i.ibb.co/kGFrNZP/Bridge-Together.png" alt="BridgeTogether Logo" className="rounded-full h-10" />
@@ -202,7 +202,7 @@ function SignOut() {
 
 function Home() {
   return (
-    <>
+    <div style={{ whiteSpace: "pre-wrap" }}>
       Introducing "UnitySpeak" - Bridging Conversations, Breaking Barriers <br /><br />
 
       Welcome to UnitySpeak, where communication knows no bounds. In a world that thrives on connections, we recognize the importance of inclusive communication. Our revolutionary app is designed to break down barriers and foster seamless conversations between differently-abled individuals and those with diverse abilities. <br /><br />
@@ -218,7 +218,7 @@ function Home() {
       🚀  Seamless Integration: UnitySpeak seamlessly integrates into your daily life, offering a wide range of features that adapt to your unique communication needs. From interactive chat rooms to personalized communication boards, we are committed to providing a platform that evolves with you. <br /><br />
 
       Join us on this journey of breaking down communication barriers, one conversation at a time. Download UnitySpeak today and be part of a community where everyone's voice is not just heard but celebrated. Together, let's create a world where communication knows no limits. <br /><br />
-    </>
+    </div>
   );
 }
 
@@ -234,7 +234,8 @@ function ContactUs() {
   );
 }
 
-function ChatRoom() {
+function ChatRoom(props) {
+  const selectedPreference = props.selectedPreference;
   const dummy = useRef();
   const messagesRef = firestore.collection('messages');
   const query = messagesRef.orderBy('createdAt');
@@ -355,27 +356,67 @@ function ChatRoom() {
     }
   };
 
+  const startRecord = <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M19 10V12C19 15.866 15.866 19 12 19M5 10V12C5 15.866 8.13401 19 12 19M12 19V22M8 22H16M12 15C10.3431 15 9 13.6569 9 12V5C9 3.34315 10.3431 2 12 2C13.6569 2 15 3.34315 15 5V12C15 13.6569 13.6569 15 12 15Z"
+      stroke="#ffffff"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>;
+
+  const stopRecord = <svg
+    width="800px"
+    height="800px"
+    viewBox="-5 0 32 32"
+    version="1.1"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g
+      id="Page-1"
+      stroke="none"
+      strokeWidth={1}
+      fill="none"
+      fillRule="evenodd"
+    >
+      <g
+        id="Icon-Set-Filled"
+        transform="translate(-107.000000, -309.000000)"
+        fill="#ffffff"
+        stroke="#ffffff"
+      >
+        <path
+          d="M118,333 C121.866,333 125,329.866 125,326 L125,316 C125,312.134 121.866,309 118,309 C114.134,309 111,312.134 111,316 L111,326 C111,329.866 114.134,333 118,333 L118,333 Z M129,328 L127,328 C126.089,332.007 122.282,335 118,335 C113.718,335 109.911,332.007 109,328 L107,328 C107.883,332.799 112.063,336.51 117,336.955 L117,339 L116,339 C115.448,339 115,339.448 115,340 C115,340.553 115.448,341 116,341 L120,341 C120.552,341 121,340.553 121,340 C121,339.448 120.552,339 120,339 L119,339 L119,336.955 C123.937,336.51 128.117,332.799 129,328 L129,328 Z"
+          id="microphone"
+        ></path>
+      </g>
+    </g>
+  </svg>;
+
   return (
     <>
-      <main className="flex flex-col gap-y-5 bg-gray-900">
-        {messages && messages.map((msg) => (
-          <ChatMessage key={msg.id} message={msg} />
-        ))}
-        {renderAudio()}
-        {renderImage()}
-        <span ref={dummy}></span>
+      <main id="chat-box-screen" className="chat-box-screen overflow-y-scroll flex flex-col justify-end py-3 px-8 gap-y-5 bg-gray-900">
+        <div  className='flex min-h-full flex-col justify-end'>
+          {messages && messages.map((msg) => (
+            <ChatMessage key={msg.id} message={msg} />
+          ))}
+          {renderAudio()}
+          {renderImage()}
+          <span ref={dummy}></span>
+        </div>
       </main>
 
-      <form onSubmit={sendMessage} className="bg-gray-900 text-slate-50">
+      <form onSubmit={sendMessage} className="form fixed right-0 left-0 bottom-0 h-15 flex items-center justify-evenly px-5 bg-gray-900 text-slate-50">
 
+        
         <input
           type="text" id="first_name"
-          className="bg-gray-50 border border-gray-300 text-slate-50 outline-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-slate-500 dark:focus:border-slate-500"
-          placeholder="Type a message or record a voice message"
+          className="bg-gray-50 h-11 border border-gray-300 text-slate-50 outline-slate-900 text-sm rounded-3xl focus:ring-blue-500 focus:border-blue-500 block w-4/5 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-slate-500 dark:focus:border-slate-500"
+          placeholder="Message"
           onChange={(e) => setFormValue(e.target.value)}
           value={formValue}
         />
-
         <ReactMic
           record={record}
           onStop={onRecordingComplete}
@@ -383,13 +424,16 @@ function ChatRoom() {
           backgroundColor="#e37034"
         />
 
-        <button type="button" onClick={() => setRecord(!record)} className="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-green-400 to-blue-600 group-hover:from-green-400 group-hover:to-blue-600 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800">
-          <span className={`relative flex items-center gap-x-3 px-5 py-2.5 transition-all ease-in duration-100 bg-white ${record ? "bg-transparent" : "bg-gray-900"} dark:bg-gray-900 rounded-md`}>{record ? 'Stop Recording' : 'Start Recording'}</span>
+        <button type="button" onClick={() => setRecord(!record)} className="relative size-11 inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-full group bg-gradient-to-br from-green-400 to-blue-600 group-hover:from-green-400 group-hover:to-blue-600 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800">
+          <span className={`relative flex p-1.5 items-center gap-x-3 transition-all ease-in duration-100 text-white ${record ? "bg-transparent" : "bg-gray-900"} dark:bg-gray-900 rounded-full size-10`}>{record ? stopRecord : startRecord}</span>
         </button>
 
         <input type='file' accept="image/*" onChange={handleImageChange} />
 
-        <button type="submit" disabled={!formValue && !blob && !image}>
+        <button type="submit" onClick={() => {
+          const scrollable = document.querySelector('#chat-box-screen');
+          scrollable.scrollTop = scrollable.scrollHeight;
+        }} disabled={!formValue && !blob && !image}>
           Send
         </button>
       </form>
@@ -463,14 +507,14 @@ function ChatMessage(props) {
   };
 
   return (
-    <div className={`message ${messageClass} flex gap-x-3 items-center px-8`}>
+    <div className={`message ${messageClass} flex gap-x-3 items-center py-3`}>
       <img className="rounded-full w-8 h-8" src={photoURL || 'https://api.adorable.io/avatars/23/abott@adorable.png'} alt="user" />
       {selectedPreference === 'Blindness' ? (
         <div>
           {text && <button onclick={() => textToSpeech(text)}>{text}</button>}
         </div>
       ) : (
-        !audioURL && <p className="bg-slate-50 px-4 py-2 rounded-3xl">{text}</p>
+        !audioURL && <p className={(messageClass == 'sent'? "bg-blue-600": "bg-slate-600")+(text && " px-4 py-2")+" rounded-3xl"}>{text}</p>
       )}
       {selectedPreference === 'Deafness' && audioURL ? <p className="bg-slate-50 px-4 py-2 rounded-3xl">{transcription}</p> : <></>}
       {imageURL && selectedPreference == "Color-Blindness" && <img src={responseImage} className="rounded-xl" alt="image" style={{ width: '300px', aspectRatio: '[3/2]' }} />}
